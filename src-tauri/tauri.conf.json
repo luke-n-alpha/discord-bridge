@@ -1,0 +1,61 @@
+{
+  "$schema": "https://tauri.app/v1/schema/tauri.schema.json",
+  "package": {
+    "productName": "Discord Bridge",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "bundle": {
+      "active": true,
+      "identifier": "ai.caretive.discordbridge",
+      "targets": ["deb", "appimage", "msi", "dmg"],
+      "resources": [],
+      "category": "Utilities",
+      "shortDescription": "Discord Bridge summary + email dispatcher",
+      "longDescription": "Multilingual Discord summarizer with scheduler and SMTP delivery.",
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "externalBin": ["bridge-cli"]
+    },
+    "updater": {
+      "active": false
+    },
+    "allowlist": {
+      "all": false,
+      "shell": {
+        "all": true
+      },
+      "fs": {
+        "all": true
+      }
+    },
+    "security": {
+      "csp": null
+    },
+    "windows": [
+      {
+        "title": "Discord Bridge",
+        "width": 1200,
+        "height": 780,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "macOS": {
+      "entitlements": null,
+      "exceptionDomain": "",
+      "frameworks": [],
+      "minimumSystemVersion": "10.14"
+    },
+    "linux": {
+      "icon": [
+        "icons/icon.png"
+      ]
+    }
+  }
+}
