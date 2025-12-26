@@ -4,23 +4,36 @@
     "productName": "Discord Bridge",
     "version": "0.1.0"
   },
+  "build": {
+    "beforeDevCommand": "cd frontend && npm run dev -- --host --port 1420",
+    "beforeBuildCommand": "cd frontend && npm run build",
+    "devPath": "http://localhost:1420",
+    "distDir": "../frontend/dist"
+  },
   "tauri": {
     "bundle": {
       "active": true,
       "identifier": "ai.caretive.discordbridge",
-      "targets": ["deb", "appimage", "msi", "dmg"],
+      "targets": [
+        "deb",
+        "appimage",
+        "msi",
+        "dmg"
+      ],
       "resources": [],
       "category": "Utilities",
       "shortDescription": "Discord Bridge summary + email dispatcher",
       "longDescription": "Multilingual Discord summarizer with scheduler and SMTP delivery.",
       "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
+        "../icons/32x32.png",
+        "../icons/128x128.png",
+        "../icons/128x128@2x.png",
+        "../icons/icon.icns",
+        "../icons/icon.ico"
       ],
-      "externalBin": ["bridge-cli"]
+      "externalBin": [
+        "bin/bridge-cli"
+      ]
     },
     "updater": {
       "active": false
@@ -45,17 +58,6 @@
         "resizable": true,
         "fullscreen": false
       }
-    ],
-    "macOS": {
-      "entitlements": null,
-      "exceptionDomain": "",
-      "frameworks": [],
-      "minimumSystemVersion": "10.14"
-    },
-    "linux": {
-      "icon": [
-        "icons/icon.png"
-      ]
-    }
+    ]
   }
 }

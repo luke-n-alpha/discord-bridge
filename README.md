@@ -1,126 +1,55 @@
-# Discord Chat Analyzer
+# Discord Bridge (Multilingual/TZ-Aware Discord Briefing & Delivery)
 
-A powerful Python script that analyzes Discord chat exports and generates comprehensive summaries using local LLM models through Ollama.
+This README is the primary English reference for the project. A full Korean translation is available in [`README.ko.md`](README.ko.md).
 
 ## Features
+- Structured summaries (summary, FAQ, help interactions, action items) generated from Discord chat exports.
+- LLM provider abstraction with OpenAI, Google Gemini, and Ollama implementations in `bridge/providers`.
+- Markdown + SMTP workflow that can run headlessly (dry-run/no-email flags) or be bundled into Tauri.
+- Desktop-scheduler vision: PyInstaller + Tauri packaging with scheduler tabs, “Run now”, and `.env` export tools.
 
-- **Smart Message Analysis**: Processes Discord chat exports and generates structured analysis including:
-  - Concise technical discussion summaries
-  - FAQ compilation from discussions 
-  - Help interaction tracking
-  - Action item extraction
-
-- **Efficient Processing**:
-  - Chunks messages for optimal processing
-  - Uses local LLM models via Ollama
-  - Progress tracking with rich CLI interface
-  - Graceful shutdown handling
-
-- **Structured Output**:
-  - Markdown formatted reports
-  - Categorized action items
-  - Clear help interaction summaries
-  - FAQ compilation
-
-## Prerequisites
-
+## Dependencies (CLI + UI)
+- Node 23 (use `nvm install 23 && nvm use 23`; `.nvmrc` is provided) and pnpm (`corepack enable && corepack prepare pnpm@latest --activate`).
 - Python 3.8+
-- [Ollama](https://ollama.ai/) installed and running
-  - https://ollama.com/download
-- Required Python packages:
-  ```
-  langchain_ollama
-  python-dateutil
-  rich
-  pydantic
-  ```
+- `requirements.txt`: `openai`, `google-generativeai`, `python-dateutil`, `rich`, `pydantic`, `requests`.
+- Optional: Ollama if you rely on `summarize.py` or the local provider (`bridge/providers/ollama_provider.py`). [`Modelfile`](Modelfile) contains the preferred local model spec.
+- Linux Tauri prereqs: webkit2gtk + librsvg (e.g., `sudo dnf install webkit2gtk4.1-devel librsvg2-devel` on Fedora/Bazzite).
 
-## Installation
+## Installation & Bootstrap
+1. Clone the repository.
+2. `./scripts/setup_env.sh` (recommended): installs Node 23 via nvm (if present), enables pnpm, installs `frontend` deps, and prints Tauri Linux prereqs.
+3. `./scripts/bootstrap.sh`: installs Python deps, PyInstaller, pnpm/Tauri toolchain, Rust/Cargo, and gives Ollama pointers.
+4. Make `scripts/run_ollama.sh` executable (`chmod +x scripts/run_ollama.sh`) before using Ollama locally.
 
-1. Clone the repository or download the script
-2. Install required packages:
-
-```bash
-pip install langchain_ollama python-dateutil rich pydantic
+## CLI Usage
 ```
-3. Ensure Ollama is installed and running with a compatible model (default: phi3-chat)
-
-The Modelfile is configured for a Linux system. Edit the Modelfile for your system: https://github.com/ollama/ollama/blob/main/docs/modelfile.md
-
-```bash
-# Pull whatever model you want to use, phi3 worked best in our tests for summarizing
-ollama run phi3:14b-medium-4k-instruct-q5_K_M
-
-# Edit the Modelfile first for your system
-ollama create phi3-chat -f Modelfile 
+python -m bridge.cli -i samples/chat_export.json --config .env
 ```
+- Use `--dry-run` to skip file/email writes, `--no-email` to stop SMTP delivery, and `--verbose` for debug logging.
+- Set `LANG=ko` or `LANG=en` (default `en`) in `.env` to influence the prompts; unsupported values fall back to English.
+- The CLI accepts directories: it processes every `*.json` transcript inside and treats missing `channel_ids` in `DISCORD_SERVERS` as `["*"]`.
+- Preprocess exports with `python preprocess.py <input.json> <out_dir>` or `python preprocess_hourly.py <input.json> <out_dir>` before invoking the orchestrator.
 
-> Note: For exporting Discord Chats you can look into using the Discord API and make a bot. Code soon.
-> If using [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter) a preprocess script is provided to make a more compact version of the JSON file to save on tokens
+## Tauri Development & Release
+- Dev: `./scripts/run_tauri_dev.sh` (uses .nvmrc Node 23, ensures pnpm deps, runs `pnpm exec tauri dev` with cargo-tauri fallback).
+- Alt dev: `scripts/dev_tauri.sh` builds `bridge-cli` via PyInstaller, installs frontend deps if needed, and runs `pnpm exec tauri dev` (cargo-tauri fallback).
+- Release: `scripts/build_tauri.sh` uses the same PyInstaller/Tauri pipeline to produce platform installers (`msi`, `dmg`, `AppImage`). Both scripts manage pnpm installs automatically.
+- Manual: `cd frontend && pnpm install && pnpm run dev` to start the Vite dev server on port 1420.
 
-## Usage
+## Environment Variables & Secrets
+- Copy `.env.example` to `.env` and populate secrets (`DISCORD_CLIENT_*`, `BOT_TOKEN`, `SMTP_*`, API keys). Never commit `.env`.
+- Configure Discord targets either via `DISCORD_SERVERS` (JSON array of `{name, guild_id, channel_ids}`) or fall back to `DISCORD_GUILD_IDS`/`DISCORD_CHANNEL_IDS`.
+- Provide paths with `INPUT_DIR`/`OUTPUT_DIR`, cron metadata with `SCHEDULE_CRON`, and a normalized `SCHEDULE_TYPE` (`daily|weekly|monthly|custom`).
+- Define `LLM_PROVIDER`, `LLM_MODEL`, optional `LLM_API_KEY`/`LLM_BASE_URL`. Ollama users should point `LLM_BASE_URL` to the warmed-up local server (default `http://127.0.0.1:11434`) after running `scripts/run_ollama.sh`.
+- Logs mask credentials; keep API keys and passwords out of source control.
 
-Basic usage:
-```bash
-python summarize.py -i samples/chat_export.json -o /path/to/output.md
-```
-
-Arguments:
-- `-i, --input`: Path to Discord chat export JSON file (required)
-- `-o, --output`: Path to save the analysis output file (optional)
-
-If no output path is specified, the analysis will be printed to stdout.
-
-## Output Format
-
-The script generates a structured markdown report containing:
-
-1. **Summary**: Focused technical discussion overview
-2. **FAQ**: Important questions and answers from the chat
-3. **Help Interactions**: Tracking of community support
-4. **Action Items**: Categorized into:
-   - Technical Tasks
-   - Documentation Needs
-   - Feature Requests
-
-> Note: using https://github.com/njvack/markdown-to-json to convert to JSON to make embedding to Eliza knowledge easier
+## Docs & Roadmap
+- [`docs/manual.md`](docs/manual.md) walks through the architecture, CLI/Tauri workflows, scheduling, and deployment scripts. A Korean translation lives in [`docs/manual.ko.md`](docs/manual.ko.md).
+- [`docs/tauri_ui_plan.md`](docs/tauri_ui_plan.md), [`docs/dev-principles.md`](docs/dev-principles.md), [`docs/release_plan.md`](docs/release_plan.md), [`docs/plan.md`](docs/plan.md), and `work-logs/luke/discord-summarizer/` remain Korean living documents describing UI plans, principles, release steps, and historical progress.
 
 ## Customization
-
-You can modify the script's behavior by adjusting:
-
-- Model settings in `__init__`:
-  ```python
-  self.model = ChatOllama(
-      model=model_name,
-      temperature=0.2,
-      num_ctx=4096,
-      ...
-  )
-  ```
-- Chunk size in `_chunk_messages`
-- Analysis structure in `format_structured_prompt`
-- Output formatting in `_format_markdown`
-
-## Error Handling
-
-The script includes:
-- Graceful CTRL+C handling
-- LLM initialization error catching
-- Progress tracking
-- Chunk processing error recovery
-
+- Adjust Ollama-specific guidance inside `summarize.py` (prompts, chunk size, structured output limits).
+- Update the prompt/JSON mapping within `bridge/providers/*` if you need additional metadata or format tweaks.
 
 ## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Acknowledgments
-
-- Uses [Ollama](https://ollama.ai/) for local LLM processing
-- Built with [LangChain](https://python.langchain.com/) and [Rich](https://rich.readthedocs.io/)
-
-## To-do
-
-- Explore structured outputs from ollama
-- Integrate into the Eliza framework
+Contributions welcome! Submit PRs, describe the commands/tests you ran, and link related issues or docs (e.g., [`docs/manual.md`](docs/manual.md), [`docs/dev-principles.md`](docs/dev-principles.md)).

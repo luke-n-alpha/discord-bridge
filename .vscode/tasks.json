@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cargo build (src-tauri)",
+      "type": "shell",
+      "command": "cargo build",
+      "options": {
+        "cwd": "${workspaceFolder}/src-tauri",
+        "env": {
+          "PATH": "${env:HOME}/.cargo/bin:${env:PATH}"
+        }
+      },
+      "group": "build",
+      "problemMatcher": ["$rustc"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "cargo test (src-tauri)",
+      "type": "shell",
+      "command": "cargo test",
+      "options": {
+        "cwd": "${workspaceFolder}/src-tauri",
+        "env": {
+          "PATH": "${env:HOME}/.cargo/bin:${env:PATH}"
+        }
+      },
+      "group": "test",
+      "problemMatcher": ["$rustc"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

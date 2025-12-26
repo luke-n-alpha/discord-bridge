@@ -1,0 +1,48 @@
+{
+  // VS Code에서 F5로 실행/디버깅하는 설정입니다.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Rust Debug (Tauri backend)",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/src-tauri/target/debug/discord-bridge-tauri",
+      "args": [],
+      "cwd": "${workspaceFolder}/src-tauri",
+      "preLaunchTask": "cargo build (src-tauri)",
+      "sourceLanguages": ["rust"]
+    },
+    {
+      "name": "Bootstrap (run)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "${workspaceFolder}/scripts/bootstrap.sh"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Ollama 서버 실행 (run)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "${workspaceFolder}/scripts/run_ollama.sh"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Tauri Dev (run)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "${workspaceFolder}/scripts/dev_tauri.sh"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Tauri Build (run)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "${workspaceFolder}/scripts/build_tauri.sh"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

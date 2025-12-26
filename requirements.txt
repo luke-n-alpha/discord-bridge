@@ -1,0 +1,6 @@
+openai
+google-generativeai
+python-dateutil
+rich
+pydantic
+requests
